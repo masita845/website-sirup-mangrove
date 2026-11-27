@@ -124,3 +124,6 @@ input,textarea{width:100%;padding:.7rem .9rem;border-radius:14px;border:2px soli
 .drawer-f .total{margin-bottom:.2rem}
 .qrbox{text-align:center;margin-top:.5rem}
 .qr{image-rendering:pixelated;padding:8px}
+.hero-art img{aspect-ratio:4/3;width:min(480px,100%)}
+.pimg{height:auto;aspect-ratio:4/3}
+.pimg img{object-position:center 40%}
