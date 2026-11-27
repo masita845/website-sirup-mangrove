@@ -8,6 +8,7 @@
 <meta name="description" content="Katalog sirup khas buah mangrove pedada, pesan mudah via WhatsApp.">
 <title>Sirup Khas Buah Mangrove</title>
 <link rel="stylesheet" href="style.css">
+<script src="qr.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
@@ -125,20 +126,28 @@
 
 <div id="overlay" class="overlay" hidden></div>
 <aside id="drawer" class="drawer" aria-label="Keranjang" aria-hidden="true">
-  <div class="drawer-h"><h2 data-i18n="cart_title">Keranjang</h2><button id="closeCart" class="chip" type="button" aria-label="Tutup">✕</button></div>
-  <div id="cartList" class="cart-list"></div>
+  <div class="drawer-h"><h2 id="drawerTitle" data-i18n="cart_title">Keranjang</h2><button id="closeCart" class="chip" type="button" aria-label="Tutup">✕</button></div>
+  <div id="drawerBody" class="drawer-body">
+    <div id="stepCart">
+      <div id="cartList" class="cart-list"></div>
+      <label for="custName" data-i18n="name_label">Nama</label>
+      <input id="custName" type="text" maxlength="60" autocomplete="name" data-i18n-ph="name_ph" placeholder="Nama lengkap">
+      <label for="custAddr" data-i18n="addr_label">Alamat pengiriman</label>
+      <textarea id="custAddr" rows="2" maxlength="200" autocomplete="street-address" data-i18n-ph="addr_ph" placeholder="Alamat lengkap"></textarea>
+      <label data-i18n="pay_pick">Metode pembayaran</label>
+      <div id="payOpts" role="radiogroup"></div>
+      <p id="formErr" class="err" role="alert"></p>
+      <button id="clearBtn" class="btn btn-ghost block" type="button" data-i18n="clear">Kosongkan</button>
+    </div>
+    <div id="stepPay" hidden>
+      <div id="payDetail" class="pinfo"></div>
+    </div>
+  </div>
   <div class="drawer-f">
     <div class="total"><span data-i18n="total">Total</span><b id="totalVal">Rp0</b></div>
-    <label for="custName" data-i18n="name_label">Nama</label>
-    <input id="custName" type="text" maxlength="60" autocomplete="name" data-i18n-ph="name_ph" placeholder="Nama lengkap">
-    <label for="custAddr" data-i18n="addr_label">Alamat pengiriman</label>
-    <textarea id="custAddr" rows="2" maxlength="200" autocomplete="street-address" data-i18n-ph="addr_ph" placeholder="Alamat lengkap"></textarea>
-    <label data-i18n="pay_pick">Metode pembayaran</label>
-    <div id="payOpts" role="radiogroup"></div>
-    <div id="payInfo" class="pinfo" aria-live="polite"></div>
-    <p id="formErr" class="err" role="alert"></p>
-    <button id="sendWa" class="btn btn-main block" type="button" data-i18n="send_wa">Pesan via WhatsApp</button>
-    <button id="clearBtn" class="btn btn-ghost block" type="button" data-i18n="clear">Kosongkan</button>
+    <button id="nextBtn" class="btn btn-main block" type="button" data-i18n="next">Lanjut ke Pembayaran</button>
+    <button id="sendWa" class="btn btn-main block" type="button" hidden data-i18n="send_paid">Saya Sudah Bayar, Kirim via WhatsApp</button>
+    <button id="backBtn" class="btn btn-ghost block" type="button" hidden data-i18n="back">Kembali</button>
   </div>
 </aside>
 

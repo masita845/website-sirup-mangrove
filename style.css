@@ -117,3 +117,10 @@ input,textarea{width:100%;padding:.7rem .9rem;border-radius:14px;border:2px soli
 .paygrid{display:grid;gap:1.1rem;grid-template-columns:1fr}
 @media(min-width:640px){.paygrid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:900px){.paygrid{grid-template-columns:repeat(4,1fr)}}
+.drawer{height:100%;max-height:100dvh}
+.drawer-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1rem}
+.cart-list{flex:none;overflow:visible;padding:0 0 .5rem}
+.drawer-f{flex:none;padding:.8rem 1rem calc(.8rem + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 18px rgba(6,47,39,.12)}
+.drawer-f .total{margin-bottom:.2rem}
+.qrbox{text-align:center;margin-top:.5rem}
+.qr{image-rendering:pixelated;padding:8px}

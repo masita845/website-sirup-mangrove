@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var CONFIG = { WA: '6281234567890', STORE: 'mangrove_cart_v1' };
+  var CONFIG = { WA: '6281234567890', STORE: 'mangrove_cart_v1', QRIS_PAYLOAD: '' };
 
   var PRODUCTS = [
     { id: 'p1', icon: '🍹', price: 35000, size: '250 ml',
@@ -25,6 +25,8 @@
 
   var I18N = {
     id: {
+      next: 'Lanjut ke Pembayaran', back: 'Kembali', send_paid: 'Saya Sudah Bayar, Kirim via WhatsApp', send_cod: 'Konfirmasi Pesanan via WhatsApp',
+      step_pay_title: 'Pembayaran', scan_qr: 'Scan QR dengan m-banking atau e-wallet. Nominal sudah terisi otomatis.',
       nav_pay: 'Pembayaran', pay_title: 'Metode Pembayaran', pay_sub: 'Pilih metode yang paling nyaman saat membuka keranjang.', pay_pick: 'Metode pembayaran',
       copy: 'Salin', copied: 'Berhasil disalin', copy_fail: 'Gagal menyalin, salin manual.', e_pay: 'Pilih metode pembayaran.', qr_missing: 'Gambar QRIS belum diunggah. Minta QR ke admin via WhatsApp.',
       o_pay: 'Pembayaran', o_code: 'Kode pesanan', o_proof: 'Bukti pembayaran akan saya kirim di chat ini.',
@@ -62,6 +64,8 @@
       o_hello: 'Halo, saya ingin memesan:', o_name: 'Nama', o_addr: 'Alamat', o_total: 'Total', o_thanks: 'Terima kasih!'
     },
     en: {
+      next: 'Continue to Payment', back: 'Back', send_paid: 'I Have Paid, Send via WhatsApp', send_cod: 'Confirm Order via WhatsApp',
+      step_pay_title: 'Payment', scan_qr: 'Scan with mobile banking or an e-wallet. The amount is pre-filled.',
       nav_pay: 'Payment', pay_title: 'Payment Methods', pay_sub: 'Choose the method you prefer when opening the cart.', pay_pick: 'Payment method',
       copy: 'Copy', copied: 'Copied', copy_fail: 'Copy failed, please copy manually.', e_pay: 'Please choose a payment method.', qr_missing: 'QRIS image not uploaded yet. Ask admin for the QR via WhatsApp.',
       o_pay: 'Payment', o_code: 'Order code', o_proof: 'I will send the payment proof in this chat.',
@@ -107,7 +111,7 @@
     { id: 'ewallet', icon: '👛', key: 'pay_ew', note: 'n_ew', fields: [{ l: 'f_wallet', v: 'DANA / GoPay / OVO' }, { l: 'f_num', v: '081234567890', copy: true }, { l: 'f_name', v: 'Sirup Mangrove Pesisir' }] },
     { id: 'cod', icon: '🤝', key: 'pay_cod', note: 'n_cod', fields: [] }
   ];
-  var payment = null;
+  var payment = null, step = 'cart', orderCode = '';
   var lang = 'id';
   var cart = {};
   var $ = function (id) { return document.getElementById(id); };
@@ -201,6 +205,7 @@
     });
     $('totalVal').textContent = rp(total());
     $('cartCount').textContent = String(count());
+    if (!keys.length && step === 'pay') setStep('cart');
   }
 
   function applyLang() {
@@ -216,28 +221,72 @@
     catch (e) { toast(t('copy_fail')); }
   }
   function payFind(id) { return PAY.filter(function (m) { return m.id === id; })[0]; }
+  function crc16(s) {
+    var c = 0xFFFF;
+    for (var i = 0; i < s.length; i++) {
+      c ^= s.charCodeAt(i) << 8;
+      for (var k = 0; k < 8; k++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) : (c << 1);
+      c &= 0xFFFF;
+    }
+    return ('0000' + c.toString(16).toUpperCase()).slice(-4);
+  }
+  function qrisPayload() {
+    var p = (CONFIG.QRIS_PAYLOAD || '').trim();
+    if (p.indexOf('000201') !== 0 || p.length < 40) return '';
+    var tags = [], i = 0;
+    while (i + 4 <= p.length) {
+      var ln = parseInt(p.substr(i + 2, 2), 10);
+      if (isNaN(ln)) return '';
+      tags.push([p.substr(i, 2), p.substr(i + 4, ln)]);
+      i += 4 + ln;
+    }
+    var out = [], ins = false;
+    tags.forEach(function (x) {
+      if (x[0] === '63' || x[0] === '54') return;
+      if (!ins && x[0] >= '55') { out.push(['54', String(total())]); ins = true; }
+      out.push(x[0] === '01' ? ['01', '12'] : x);
+    });
+    var s = out.map(function (x) { return x[0] + ('0' + x[1].length).slice(-2) + x[1]; }).join('') + '6304';
+    return s + crc16(s);
+  }
+  function qrisBlock() {
+    var wrap = el('div', 'qrbox'), done = false, pl = qrisPayload();
+    if (pl && window.qrcode) {
+      try {
+        var q = window.qrcode(0, 'M'); q.addData(pl); q.make();
+        var im = el('img', 'qr'); im.alt = 'QRIS'; im.src = q.createDataURL(6, 4);
+        wrap.appendChild(el('p', 'note', t('scan_qr'))); wrap.appendChild(im); done = true;
+      } catch (e) { done = false; }
+    }
+    if (!done) {
+      var f = el('img', 'qr'); f.alt = 'QRIS'; f.src = 'images/qris.png';
+      var miss = el('p', 'note', t('qr_missing')); miss.hidden = true;
+      f.addEventListener('error', function () { f.hidden = true; miss.hidden = false; });
+      wrap.appendChild(f); wrap.appendChild(miss);
+    }
+    return wrap;
+  }
   function renderPayInfo() {
-    var box = $('payInfo');
+    var box = $('payDetail');
     box.replaceChildren();
     var m = payFind(payment);
     if (!m) return;
-    m.fields.forEach(function (f) {
+    function row(l, v, cp) {
       var r = el('div', 'pf');
-      r.appendChild(el('span', 'pl', t(f.l)));
-      r.appendChild(el('b', 'pv', f.v));
-      if (f.copy) {
+      r.appendChild(el('span', 'pl', l));
+      r.appendChild(el('b', 'pv', v));
+      if (cp) {
         var b = el('button', 'copy', t('copy')); b.type = 'button';
-        b.addEventListener('click', function () { copyText(f.v); });
+        b.addEventListener('click', function () { copyText(cp); });
         r.appendChild(b);
       }
       box.appendChild(r);
-    });
-    if (m.qr) {
-      var q = el('img', 'qr'); q.alt = 'QRIS'; q.src = m.qr;
-      var miss = el('p', 'note', t('qr_missing')); miss.hidden = true;
-      q.addEventListener('error', function () { q.hidden = true; miss.hidden = false; });
-      box.appendChild(q); box.appendChild(miss);
     }
+    row(t('o_code'), orderCode);
+    row(t('o_pay'), t(m.key));
+    row(t('total'), rp(total()), m.id === 'cod' ? '' : String(total()));
+    m.fields.forEach(function (f) { row(t(f.l), f.v, f.copy ? f.v : ''); });
+    if (m.id === 'qris') box.appendChild(qrisBlock());
     box.appendChild(el('p', 'note', t(m.note)));
   }
   function renderPay() {
@@ -251,11 +300,11 @@
       g.appendChild(c);
       var lb = el('label', 'popt');
       var inp = el('input'); inp.type = 'radio'; inp.name = 'pay'; inp.value = m.id; inp.checked = payment === m.id;
-      inp.addEventListener('change', function () { payment = m.id; renderPayInfo(); });
+      inp.addEventListener('change', function () { payment = m.id; $('formErr').textContent = ''; });
       lb.appendChild(inp); lb.appendChild(el('span', '', m.icon + ' ' + t(m.key)));
       o.appendChild(lb);
     });
-    renderPayInfo();
+    if (step === 'pay') setStep('pay');
   }
   function waUrl(text) { return 'https://wa.me/' + CONFIG.WA + '?text=' + encodeURIComponent(text); }
   function setLinks() {
@@ -264,6 +313,7 @@
   }
 
   function openCart(open) {
+    if (!open) setStep('cart');
     $('drawer').classList.toggle('open', open);
     $('drawer').setAttribute('aria-hidden', String(!open));
     $('overlay').hidden = !open;
@@ -274,26 +324,45 @@
     return String(s).replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
   }
 
-  function checkout() {
+  function validate() {
     var err = $('formErr');
     err.textContent = '';
-    if (!count()) { err.textContent = t('e_empty'); return; }
+    if (!count()) { err.textContent = t('e_empty'); return null; }
     var name = clean($('custName').value, 60);
     var addr = clean($('custAddr').value, 200);
-    if (!/^[\p{L}\p{N} .,'\-]{2,60}$/u.test(name)) { err.textContent = t('e_name'); $('custName').focus(); return; }
-    if (addr.length < 5) { err.textContent = t('e_addr'); $('custAddr').focus(); return; }
+    if (!/^[\p{L}\p{N} .,'\-]{2,60}$/u.test(name)) { err.textContent = t('e_name'); $('custName').focus(); return null; }
+    if (addr.length < 5) { err.textContent = t('e_addr'); $('custAddr').focus(); return null; }
     var pm = payFind(payment);
-    if (!pm) { err.textContent = t('e_pay'); return; }
-    var lines = [t('o_hello'), t('o_code') + ': MGV-' + Date.now().toString(36).toUpperCase()];
+    if (!pm) { err.textContent = t('e_pay'); return null; }
+    return { name: name, addr: addr, pm: pm };
+  }
+  function setStep(s) {
+    step = s;
+    var pay = s === 'pay';
+    $('stepCart').hidden = pay; $('stepPay').hidden = !pay;
+    $('nextBtn').hidden = pay; $('sendWa').hidden = !pay; $('backBtn').hidden = !pay;
+    $('drawerTitle').textContent = t(pay ? 'step_pay_title' : 'cart_title');
+    if (pay) { $('sendWa').textContent = t(payment === 'cod' ? 'send_cod' : 'send_paid'); renderPayInfo(); }
+    $('drawerBody').scrollTop = 0;
+  }
+  function goNext() {
+    if (!validate()) return;
+    orderCode = 'MGV-' + Date.now().toString(36).toUpperCase();
+    setStep('pay');
+  }
+  function sendOrder() {
+    var v = validate();
+    if (!v) { setStep('cart'); return; }
+    var lines = [t('o_hello'), t('o_code') + ': ' + orderCode];
     Object.keys(cart).forEach(function (k, i) {
       var p = find(k);
       lines.push((i + 1) + '. ' + p.name[lang] + ' (' + p.size + ') x' + cart[k] + ' = ' + rp(p.price * cart[k]));
     });
     lines.push(t('o_total') + ': ' + rp(total()));
-    lines.push(t('o_pay') + ': ' + t(pm.key));
-    if (pm.id !== 'cod') lines.push(t('o_proof'));
-    lines.push(t('o_name') + ': ' + name);
-    lines.push(t('o_addr') + ': ' + addr);
+    lines.push(t('o_pay') + ': ' + t(v.pm.key));
+    if (v.pm.id !== 'cod') lines.push(t('o_proof'));
+    lines.push(t('o_name') + ': ' + v.name);
+    lines.push(t('o_addr') + ': ' + v.addr);
     lines.push(t('o_thanks'));
     toast(t('t_sent'));
     window.open(waUrl(lines.join('\n')), '_blank', 'noopener,noreferrer');
@@ -308,7 +377,9 @@
     $('ctaCart').addEventListener('click', function () { openCart(true); });
     $('closeCart').addEventListener('click', function () { openCart(false); });
     $('overlay').addEventListener('click', function () { openCart(false); });
-    $('sendWa').addEventListener('click', checkout);
+    $('nextBtn').addEventListener('click', goNext);
+    $('sendWa').addEventListener('click', sendOrder);
+    $('backBtn').addEventListener('click', function () { setStep('cart'); });
     $('clearBtn').addEventListener('click', function () { if (count()) modal(true); });
     $('mNo').addEventListener('click', function () { modal(false); });
     $('mYes').addEventListener('click', function () { cart = {}; save(); renderCart(); modal(false); toast(t('t_cleared')); });
