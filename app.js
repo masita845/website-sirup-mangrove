@@ -158,7 +158,7 @@
       var pi = el('div', 'pimg');
       pi.appendChild(el('span', '', p.icon));
       var im = el('img');
-      im.alt = p.name[lang]; im.loading = 'lazy'; im.src = 'images/' + SLUG[p.id] + '.jpg';
+      im.alt = p.name[lang]; im.loading = 'lazy'; var ip = 'images/' + SLUG[p.id] + '.jpg'; im.src = (window.IMG && window.IMG[ip]) || ip;
       im.addEventListener('load', function () { pi.classList.add('has'); });
       pi.appendChild(im);
       c.appendChild(pi);
@@ -396,6 +396,7 @@
       if (!$('modal').hidden) modal(false); else if ($('drawer').classList.contains('open')) openCart(false);
     });
     var hi = $('heroImg');
+    if (window.IMG && window.IMG['images/hero.jpg']) hi.src = window.IMG['images/hero.jpg'];
     hi.addEventListener('load', function () { $('heroArt').classList.add('has'); });
     if (hi.complete && hi.naturalWidth) $('heroArt').classList.add('has');
     applyLang();
