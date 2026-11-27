@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Katalog sirup khas buah mangrove pedada, pesan mudah via WhatsApp.">
+<title>Sirup Khas Buah Mangrove</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#beranda" class="brand"><span class="brand-dot">🌿</span><span>Sirup Mangrove</span></a>
+    <nav id="menu" class="menu" aria-label="Navigasi utama">
+      <a href="#beranda" data-i18n="nav_home">Beranda</a>
+      <a href="#produk" data-i18n="nav_products">Produk</a>
+      <a href="#tentang" data-i18n="nav_about">Tentang Kami</a>
+      <a href="#manfaat" data-i18n="nav_benefit">Manfaat</a>
+      <a href="#cara" data-i18n="nav_order">Cara Pesan</a>
+    </nav>
+    <div class="nav-act">
+      <button id="langBtn" class="chip" type="button" aria-label="Pilih bahasa">EN</button>
+      <button id="cartBtn" class="chip chip-cart" type="button" aria-label="Keranjang">🛒 <span id="cartCount">0</span></button>
+      <button id="burger" class="chip burger" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="beranda" class="hero">
+  <div class="wrap hero-in">
+    <div class="hero-txt">
+      <span class="tag" data-i18n="hero_tag">Khas Pesisir Nusantara</span>
+      <h1 data-i18n="hero_title">Sirup Buah Mangrove, Segarnya Pesisir dalam Setiap Tegukan</h1>
+      <p data-i18n="hero_text">Dibuat dari buah pedada pilihan hasil petik warga pesisir. Rasa asam-manis alami, tanpa pewarna buatan.</p>
+      <div class="btn-row">
+        <a href="#produk" class="btn btn-main" data-i18n="hero_cta1">Lihat Produk</a>
+        <a href="#cara" class="btn btn-ghost" data-i18n="hero_cta2">Cara Pesan</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 240 280" class="bottle">
+        <rect x="90" y="10" width="60" height="34" rx="10" class="s-gold"/>
+        <rect x="76" y="40" width="88" height="224" rx="34" class="s-pink"/>
+        <rect x="88" y="120" width="64" height="96" rx="16" class="s-sand"/>
+        <path d="M120 140c14 6 20 18 12 34-14-2-22-16-12-34z" class="s-green"/>
+        <path d="M120 176v22" class="s-line"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="produk" class="sec">
+  <div class="wrap">
+    <h2 data-i18n="prod_title">Katalog Produk</h2>
+    <p class="sub" data-i18n="prod_sub">Pilih varian favoritmu, tambahkan ke keranjang, lalu pesan via WhatsApp.</p>
+    <div id="grid" class="grid"></div>
+    <p class="note" data-i18n="disclaimer">Produk pangan olahan, bukan obat. Harga dapat berubah sewaktu-waktu.</p>
+  </div>
+</section>
+
+<section id="tentang" class="sec sec-alt">
+  <div class="wrap two">
+    <div>
+      <h2 data-i18n="about_title">Tentang Kami</h2>
+      <p data-i18n="about_p1">Kami adalah kelompok usaha pesisir yang mengolah buah mangrove menjadi produk pangan bernilai tambah.</p>
+      <p data-i18n="about_p2">Setiap botol turut mendukung penghasilan warga dan upaya menjaga hutan mangrove tetap lestari.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>100%</b><span data-i18n="stat1">Petik lokal</span></div>
+      <div class="stat"><b>0</b><span data-i18n="stat2">Pewarna buatan</span></div>
+      <div class="stat"><b>🌱</b><span data-i18n="stat3">Peduli pesisir</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="manfaat" class="sec">
+  <div class="wrap">
+    <h2 data-i18n="ben_title">Manfaat &amp; Edukasi Mangrove</h2>
+    <p class="sub" data-i18n="ben_sub">Kenali lebih dekat pohon penjaga pantai yang buahnya kita olah.</p>
+    <div class="cards">
+      <article class="card"><div class="ico">🌊</div><h3 data-i18n="b1t">Penahan Abrasi</h3><p data-i18n="b1d">Akar mangrove meredam ombak dan menjaga garis pantai dari pengikisan.</p></article>
+      <article class="card"><div class="ico">🐟</div><h3 data-i18n="b2t">Rumah Biota Laut</h3><p data-i18n="b2d">Ekosistemnya menjadi tempat berkembang biak ikan, udang, dan kepiting.</p></article>
+      <article class="card"><div class="ico">🍹</div><h3 data-i18n="b3t">Pangan Alternatif</h3><p data-i18n="b3d">Buah pedada dapat diolah menjadi sirup dan sajian lain tanpa menebang pohon.</p></article>
+      <article class="card"><div class="ico">🌍</div><h3 data-i18n="b4t">Serap Karbon</h3><p data-i18n="b4d">Hutan mangrove menyimpan karbon dan membantu menekan dampak perubahan iklim.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="cara" class="sec sec-alt">
+  <div class="wrap">
+    <h2 data-i18n="how_title">Cara Pesan via WhatsApp</h2>
+    <ol class="steps">
+      <li><b>1</b><div><h3 data-i18n="s1t">Pilih Produk</h3><p data-i18n="s1d">Telusuri katalog dan tekan tombol tambah.</p></div></li>
+      <li><b>2</b><div><h3 data-i18n="s2t">Buka Keranjang</h3><p data-i18n="s2d">Atur jumlah dan isi nama serta alamat.</p></div></li>
+      <li><b>3</b><div><h3 data-i18n="s3t">Kirim ke WhatsApp</h3><p data-i18n="s3d">Pesanan tersusun otomatis, tinggal kirim.</p></div></li>
+      <li><b>4</b><div><h3 data-i18n="s4t">Konfirmasi &amp; Bayar</h3><p data-i18n="s4d">Admin mengonfirmasi stok, ongkir, dan pembayaran.</p></div></li>
+    </ol>
+    <div class="center"><button id="ctaCart" class="btn btn-main" type="button" data-i18n="open_cart">Buka Keranjang</button></div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <b>Sirup Mangrove</b>
+    <span data-i18n="footer">Dari pesisir untuk Anda. Pesan lewat WhatsApp.</span>
+    <a id="footWa" class="btn btn-gold" href="#beranda" target="_blank" rel="noopener noreferrer" data-i18n="chat_us">Chat Kami</a>
+  </div>
+</footer>
+
+<a id="waFloat" class="wa-float" href="#beranda" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
+
+<div id="overlay" class="overlay" hidden></div>
+<aside id="drawer" class="drawer" aria-label="Keranjang" aria-hidden="true">
+  <div class="drawer-h"><h2 data-i18n="cart_title">Keranjang</h2><button id="closeCart" class="chip" type="button" aria-label="Tutup">✕</button></div>
+  <div id="cartList" class="cart-list"></div>
+  <div class="drawer-f">
+    <div class="total"><span data-i18n="total">Total</span><b id="totalVal">Rp0</b></div>
+    <label for="custName" data-i18n="name_label">Nama</label>
+    <input id="custName" type="text" maxlength="60" autocomplete="name" data-i18n-ph="name_ph" placeholder="Nama lengkap">
+    <label for="custAddr" data-i18n="addr_label">Alamat pengiriman</label>
+    <textarea id="custAddr" rows="2" maxlength="200" autocomplete="street-address" data-i18n-ph="addr_ph" placeholder="Alamat lengkap"></textarea>
+    <p id="formErr" class="err" role="alert"></p>
+    <button id="sendWa" class="btn btn-main block" type="button" data-i18n="send_wa">Pesan via WhatsApp</button>
+    <button id="clearBtn" class="btn btn-ghost block" type="button" data-i18n="clear">Kosongkan</button>
+  </div>
+</aside>
+
+<div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal-box">
+    <h3 id="mTitle" data-i18n="m_title">Kosongkan keranjang?</h3>
+    <p data-i18n="m_text">Semua produk di keranjang akan dihapus.</p>
+    <div class="btn-row">
+      <button id="mYes" class="btn btn-main" type="button" data-i18n="m_yes">Ya, kosongkan</button>
+      <button id="mNo" class="btn btn-ghost" type="button" data-i18n="m_no">Batal</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
