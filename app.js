@@ -25,6 +25,13 @@
 
   var I18N = {
     id: {
+      nav_pay: 'Pembayaran', pay_title: 'Metode Pembayaran', pay_sub: 'Pilih metode yang paling nyaman saat membuka keranjang.', pay_pick: 'Metode pembayaran',
+      copy: 'Salin', copied: 'Berhasil disalin', copy_fail: 'Gagal menyalin, salin manual.', e_pay: 'Pilih metode pembayaran.', qr_missing: 'Gambar QRIS belum diunggah. Minta QR ke admin via WhatsApp.',
+      o_pay: 'Pembayaran', o_code: 'Kode pesanan', o_proof: 'Bukti pembayaran akan saya kirim di chat ini.',
+      f_bank: 'Bank', f_acc: 'No. Rekening', f_name: 'Atas nama', f_wallet: 'E-wallet', f_num: 'Nomor',
+      pay_bank: 'Transfer Bank', pay_bank_d: 'Transfer manual ke rekening toko, kirim bukti via WhatsApp.', pay_qris: 'QRIS', pay_qris_d: 'Scan satu QR dari m-banking atau e-wallet apa pun.',
+      pay_ew: 'E-Wallet', pay_ew_d: 'Kirim ke DANA, GoPay, atau OVO.', pay_cod: 'Bayar di Tempat (COD)', pay_cod_d: 'Bayar tunai saat pesanan tiba (area tertentu).',
+      n_bank: 'Pesanan diproses setelah bukti transfer diterima.', n_qris: 'Pastikan nominal sesuai total pesanan.', n_ew: 'Cantumkan kode pesanan di catatan transfer.', n_cod: 'Ketersediaan COD dikonfirmasi admin.',
       nav_home: 'Beranda', nav_products: 'Produk', nav_about: 'Tentang Kami', nav_benefit: 'Manfaat', nav_order: 'Cara Pesan',
       hero_tag: 'Khas Pesisir Nusantara', hero_title: 'Sirup Buah Mangrove, Segarnya Pesisir dalam Setiap Tegukan',
       hero_text: 'Dibuat dari buah pedada pilihan hasil petik warga pesisir. Rasa asam-manis alami, tanpa pewarna buatan.',
@@ -55,6 +62,13 @@
       o_hello: 'Halo, saya ingin memesan:', o_name: 'Nama', o_addr: 'Alamat', o_total: 'Total', o_thanks: 'Terima kasih!'
     },
     en: {
+      nav_pay: 'Payment', pay_title: 'Payment Methods', pay_sub: 'Choose the method you prefer when opening the cart.', pay_pick: 'Payment method',
+      copy: 'Copy', copied: 'Copied', copy_fail: 'Copy failed, please copy manually.', e_pay: 'Please choose a payment method.', qr_missing: 'QRIS image not uploaded yet. Ask admin for the QR via WhatsApp.',
+      o_pay: 'Payment', o_code: 'Order code', o_proof: 'I will send the payment proof in this chat.',
+      f_bank: 'Bank', f_acc: 'Account No.', f_name: 'Account name', f_wallet: 'E-wallet', f_num: 'Number',
+      pay_bank: 'Bank Transfer', pay_bank_d: 'Manual transfer to the shop account, send proof on WhatsApp.', pay_qris: 'QRIS', pay_qris_d: 'Scan one QR from any mobile banking or e-wallet app.',
+      pay_ew: 'E-Wallet', pay_ew_d: 'Send to DANA, GoPay, or OVO.', pay_cod: 'Cash on Delivery', pay_cod_d: 'Pay cash when the order arrives (selected areas).',
+      n_bank: 'Orders are processed once proof of transfer is received.', n_qris: 'Make sure the amount matches your order total.', n_ew: 'Include the order code in the transfer note.', n_cod: 'COD availability is confirmed by admin.',
       nav_home: 'Home', nav_products: 'Products', nav_about: 'About Us', nav_benefit: 'Benefits', nav_order: 'How to Order',
       hero_tag: 'Coastal Archipelago Specialty', hero_title: 'Mangrove Fruit Syrup, the Coast\'s Freshness in Every Sip',
       hero_text: 'Made from selected pedada fruit picked by coastal communities. Natural sweet-tart taste, no artificial colors.',
@@ -86,6 +100,14 @@
     }
   };
 
+  var SLUG = { p1: 'sirup-pedada-original', p2: 'sirup-pedada-jahe', p3: 'sirup-pedada-madu', p4: 'sirup-pedada-lemon', p5: 'sirup-pedada-besar', p6: 'paket-hampers' };
+  var PAY = [
+    { id: 'bank', icon: '🏦', key: 'pay_bank', note: 'n_bank', fields: [{ l: 'f_bank', v: 'BCA' }, { l: 'f_acc', v: '1234567890', copy: true }, { l: 'f_name', v: 'Sirup Mangrove Pesisir' }] },
+    { id: 'qris', icon: '📱', key: 'pay_qris', note: 'n_qris', qr: 'images/qris.png', fields: [] },
+    { id: 'ewallet', icon: '👛', key: 'pay_ew', note: 'n_ew', fields: [{ l: 'f_wallet', v: 'DANA / GoPay / OVO' }, { l: 'f_num', v: '081234567890', copy: true }, { l: 'f_name', v: 'Sirup Mangrove Pesisir' }] },
+    { id: 'cod', icon: '🤝', key: 'pay_cod', note: 'n_cod', fields: [] }
+  ];
+  var payment = null;
   var lang = 'id';
   var cart = {};
   var $ = function (id) { return document.getElementById(id); };
@@ -129,7 +151,13 @@
     g.replaceChildren();
     PRODUCTS.forEach(function (p) {
       var c = el('article', 'pcard');
-      c.appendChild(el('div', 'pimg', p.icon));
+      var pi = el('div', 'pimg');
+      pi.appendChild(el('span', '', p.icon));
+      var im = el('img');
+      im.alt = p.name[lang]; im.loading = 'lazy'; im.src = 'images/' + SLUG[p.id] + '.jpg';
+      im.addEventListener('load', function () { pi.classList.add('has'); });
+      pi.appendChild(im);
+      c.appendChild(pi);
       c.appendChild(el('h3', '', p.name[lang]));
       c.appendChild(el('p', 'pmeta', p.desc[lang]));
       c.appendChild(el('p', 'pmeta', p.size));
@@ -180,9 +208,55 @@
     document.querySelectorAll('[data-i18n]').forEach(function (n) { n.textContent = t(n.getAttribute('data-i18n')); });
     document.querySelectorAll('[data-i18n-ph]').forEach(function (n) { n.placeholder = t(n.getAttribute('data-i18n-ph')); });
     $('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
-    renderProducts(); renderCart(); setLinks(); save();
+    renderProducts(); renderCart(); renderPay(); setLinks(); save();
   }
 
+  function copyText(v) {
+    try { navigator.clipboard.writeText(v).then(function () { toast(t('copied')); }, function () { toast(t('copy_fail')); }); }
+    catch (e) { toast(t('copy_fail')); }
+  }
+  function payFind(id) { return PAY.filter(function (m) { return m.id === id; })[0]; }
+  function renderPayInfo() {
+    var box = $('payInfo');
+    box.replaceChildren();
+    var m = payFind(payment);
+    if (!m) return;
+    m.fields.forEach(function (f) {
+      var r = el('div', 'pf');
+      r.appendChild(el('span', 'pl', t(f.l)));
+      r.appendChild(el('b', 'pv', f.v));
+      if (f.copy) {
+        var b = el('button', 'copy', t('copy')); b.type = 'button';
+        b.addEventListener('click', function () { copyText(f.v); });
+        r.appendChild(b);
+      }
+      box.appendChild(r);
+    });
+    if (m.qr) {
+      var q = el('img', 'qr'); q.alt = 'QRIS'; q.src = m.qr;
+      var miss = el('p', 'note', t('qr_missing')); miss.hidden = true;
+      q.addEventListener('error', function () { q.hidden = true; miss.hidden = false; });
+      box.appendChild(q); box.appendChild(miss);
+    }
+    box.appendChild(el('p', 'note', t(m.note)));
+  }
+  function renderPay() {
+    var g = $('payGrid'); g.replaceChildren();
+    var o = $('payOpts'); o.replaceChildren();
+    PAY.forEach(function (m) {
+      var c = el('article', 'card');
+      c.appendChild(el('div', 'ico', m.icon));
+      c.appendChild(el('h3', '', t(m.key)));
+      c.appendChild(el('p', '', t(m.key + '_d')));
+      g.appendChild(c);
+      var lb = el('label', 'popt');
+      var inp = el('input'); inp.type = 'radio'; inp.name = 'pay'; inp.value = m.id; inp.checked = payment === m.id;
+      inp.addEventListener('change', function () { payment = m.id; renderPayInfo(); });
+      lb.appendChild(inp); lb.appendChild(el('span', '', m.icon + ' ' + t(m.key)));
+      o.appendChild(lb);
+    });
+    renderPayInfo();
+  }
   function waUrl(text) { return 'https://wa.me/' + CONFIG.WA + '?text=' + encodeURIComponent(text); }
   function setLinks() {
     $('waFloat').href = waUrl(t('wa_hello'));
@@ -208,12 +282,16 @@
     var addr = clean($('custAddr').value, 200);
     if (!/^[\p{L}\p{N} .,'\-]{2,60}$/u.test(name)) { err.textContent = t('e_name'); $('custName').focus(); return; }
     if (addr.length < 5) { err.textContent = t('e_addr'); $('custAddr').focus(); return; }
-    var lines = [t('o_hello')];
+    var pm = payFind(payment);
+    if (!pm) { err.textContent = t('e_pay'); return; }
+    var lines = [t('o_hello'), t('o_code') + ': MGV-' + Date.now().toString(36).toUpperCase()];
     Object.keys(cart).forEach(function (k, i) {
       var p = find(k);
       lines.push((i + 1) + '. ' + p.name[lang] + ' (' + p.size + ') x' + cart[k] + ' = ' + rp(p.price * cart[k]));
     });
     lines.push(t('o_total') + ': ' + rp(total()));
+    lines.push(t('o_pay') + ': ' + t(pm.key));
+    if (pm.id !== 'cod') lines.push(t('o_proof'));
     lines.push(t('o_name') + ': ' + name);
     lines.push(t('o_addr') + ': ' + addr);
     lines.push(t('o_thanks'));
@@ -246,6 +324,9 @@
       if (e.key !== 'Escape') return;
       if (!$('modal').hidden) modal(false); else if ($('drawer').classList.contains('open')) openCart(false);
     });
+    var hi = $('heroImg');
+    hi.addEventListener('load', function () { $('heroArt').classList.add('has'); });
+    if (hi.complete && hi.naturalWidth) $('heroArt').classList.add('has');
     applyLang();
   }
 

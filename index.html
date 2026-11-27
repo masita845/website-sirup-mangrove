@@ -20,6 +20,7 @@
       <a href="#tentang" data-i18n="nav_about">Tentang Kami</a>
       <a href="#manfaat" data-i18n="nav_benefit">Manfaat</a>
       <a href="#cara" data-i18n="nav_order">Cara Pesan</a>
+      <a href="#bayar" data-i18n="nav_pay">Pembayaran</a>
     </nav>
     <div class="nav-act">
       <button id="langBtn" class="chip" type="button" aria-label="Pilih bahasa">EN</button>
@@ -41,7 +42,8 @@
         <a href="#cara" class="btn btn-ghost" data-i18n="hero_cta2">Cara Pesan</a>
       </div>
     </div>
-    <div class="hero-art" aria-hidden="true">
+    <div id="heroArt" class="hero-art">
+      <img id="heroImg" src="images/hero.jpg" alt="Buah pedada dan hutan mangrove" width="340" height="425">
       <svg viewBox="0 0 240 280" class="bottle">
         <rect x="90" y="10" width="60" height="34" rx="10" class="s-gold"/>
         <rect x="76" y="40" width="88" height="224" rx="34" class="s-pink"/>
@@ -102,6 +104,13 @@
     <div class="center"><button id="ctaCart" class="btn btn-main" type="button" data-i18n="open_cart">Buka Keranjang</button></div>
   </div>
 </section>
+<section id="bayar" class="sec">
+  <div class="wrap">
+    <h2 data-i18n="pay_title">Metode Pembayaran</h2>
+    <p class="sub" data-i18n="pay_sub">Pilih metode yang paling nyaman saat membuka keranjang.</p>
+    <div id="payGrid" class="paygrid"></div>
+  </div>
+</section>
 </main>
 
 <footer class="foot">
@@ -124,6 +133,9 @@
     <input id="custName" type="text" maxlength="60" autocomplete="name" data-i18n-ph="name_ph" placeholder="Nama lengkap">
     <label for="custAddr" data-i18n="addr_label">Alamat pengiriman</label>
     <textarea id="custAddr" rows="2" maxlength="200" autocomplete="street-address" data-i18n-ph="addr_ph" placeholder="Alamat lengkap"></textarea>
+    <label data-i18n="pay_pick">Metode pembayaran</label>
+    <div id="payOpts" role="radiogroup"></div>
+    <div id="payInfo" class="pinfo" aria-live="polite"></div>
     <p id="formErr" class="err" role="alert"></p>
     <button id="sendWa" class="btn btn-main block" type="button" data-i18n="send_wa">Pesan via WhatsApp</button>
     <button id="clearBtn" class="btn btn-ghost block" type="button" data-i18n="clear">Kosongkan</button>
